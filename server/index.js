@@ -1,8 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { graphqlHTTP } = require('express-graphql')
 const { default: mongoose } = require('mongoose')
-const { buildSchema, GraphQLSchema, GraphQLObjectType, GraphQLString } = require('graphql')
 require('dotenv').config()
 const { ApolloServer } = require('apollo-server-express')
 
@@ -16,31 +14,35 @@ app.use(express.json())
 const schema = require('./graphql/schema')
 const auth = require('./services/auth')
 
-start = async () => {
-  mongoose.connect(MONGO_DB, (error) => {
-    if (error) {
-      throw new Error(error)
-    } else {
-      console.log('Mongo db connected');
-    }
-  })
+const start = async () => {
+    mongoose.connect(MONGO_DB, (error) => {
+        if (error) {
+            throw new Error(error)
+        } else {
+            console.log('Mongo db connected')
+        }
+    })
 
-  const server = new ApolloServer({
-    schema, 
-    csrfPrevention: true,
-    playground: true, 
-    context: ({ req }) => {
-      const token = req.headers.authorization || ''
-      const user = auth.jwtVerify(token);
-      return { user };
-    },
-  });
+    const server = new ApolloServer({
+        schema,
+        csrfPrevention: true,
+        playground: true,
+        context: ({ req }) => {
+            const authorization = req.headers.authorization || ''
+            if (authorization) {
+                const token = req.headers.authorization.split(' ')[1]
+                const user = auth.jwtVerify(token)
+                return { user }
+            }
+            return null
+        },
+    })
 
-  await server.start();
-  server.applyMiddleware({app, cors: true})
-  app.listen(PORT, () => {
-    console.log('Server start at ' + PORT);
-  })
+    await server.start()
+    server.applyMiddleware({ app, cors: true })
+    app.listen(PORT, () => {
+        console.log(`Server start at ${PORT}`)
+    })
 }
 
 start()
