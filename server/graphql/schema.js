@@ -34,18 +34,17 @@ const todoListType = new GraphQLObjectType({
     name: 'TodoList',
     fields: () => ({
         id: { type: GraphQLID },
-        name: { type: GraphQLString },
-        color: { type: GraphQLString },
+        name: { type: GraphQLString, require: true },
+        color: { type: GraphQLString, default: '' },
         user: {
             type: userType,
-            resolve(source) {
-                User.findById(source.user)
-            },
+            require: true,
         },
         items: {
             type: new GraphQLList(todoItemType),
+            require: true,
             resolve(source) {
-                TodoItem.find({ todoList: source.id })
+                return TodoItem.find({ todoList: source.id }).exec()
             },
         },
     }),
@@ -55,18 +54,13 @@ const todoItemType = new GraphQLObjectType({
     name: 'TodoItem',
     fields: () => ({
         id: { type: GraphQLID },
-        name: { type: GraphQLString },
+        name: { type: GraphQLString, require: true },
         isDone: { type: GraphQLBoolean },
-        user: {
-            type: userType,
-            resolve(source) {
-                User.findById(source.user)
-            },
-        },
         todoList: {
             type: todoListType,
-            resolve(source) {
-                TodoList.findById(source.todoList)
+            require: true,
+            resolve(parents) {
+                return TodoList.findById(parents.get('todoList')).exec()
             },
         },
     }),
@@ -86,21 +80,15 @@ const privatNameSpaceQuery = new GraphQLObjectType({
         todoList: {
             type: todoListType,
             args: { id: { type: GraphQLID } },
-            resolve(parents, args, context) {
-                return TodoList.findById({
-                    user: context.user.id,
-                    id: args.id,
-                }).exec()
+            resolve(parents, args) {
+                return TodoList.findById(args.id).exec()
             },
         },
         todoItem: {
             type: todoItemType,
             args: { id: { type: GraphQLID } },
-            resolve(parents, args, context) {
-                return TodoItem.findById({
-                    user: context.user.id,
-                    id: args.id,
-                }).exec()
+            resolve(parents, args) {
+                return TodoItem.findById(args.id).exec()
             },
         },
         users: {
@@ -114,14 +102,20 @@ const privatNameSpaceQuery = new GraphQLObjectType({
             type: new GraphQLList(todoListType),
             args: {},
             resolve(parents, args, context) {
-                return TodoList.find({ user: context.user.id }).exec()
+                return TodoList.find({ user: context.user.id })
+                    .populate('items')
+                    .exec()
             },
         },
         todoItems: {
             type: new GraphQLList(todoItemType),
-            args: {},
-            resolve(parents, args, context) {
-                return TodoItem.find({ user: context.user.id }).exec()
+            args: {
+                todoList: { type: GraphQLID },
+            },
+            resolve(parents, args) {
+                return TodoItem.find({
+                    todoList: args.todoList,
+                }).exec()
             },
         },
     },
@@ -151,11 +145,13 @@ const privateNameSpaceMutation = new GraphQLObjectType({
             type: todoListType,
             args: {
                 name: { type: GraphQLString },
+                color: { type: GraphQLString },
                 user: { type: GraphQLID },
             },
-            resolve(source, { name, user }) {
+            resolve(source, { name, user, color }) {
                 return TodoList.create({
                     name,
+                    color,
                     user,
                 })
             },
@@ -184,6 +180,13 @@ const publicNameSpaceMutation = new GraphQLObjectType({
             },
             resolve(source, { username, password }) {
                 return auth.login(username, password)
+            },
+        },
+        auth: {
+            type: jwtType,
+            args: {},
+            resolve(source, params, context) {
+                return auth.check(context)
             },
         },
     }),

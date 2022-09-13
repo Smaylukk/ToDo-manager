@@ -1,12 +1,9 @@
-const { Schema, model } = require("mongoose");
-const TodoList = require("./TodoList");
-const User = require("./User");
+const { Schema, model } = require('mongoose')
 
 const TodoItem = new Schema({
-  name: { type: String, required: true },
-  isDone: { type: Boolean, default: false },
-  todolist: { type: Schema.Types.ObjectId, ref:TodoList },
-  user: { type: Schema.Types.ObjectId, ref: User },
+    name: { type: String },
+    isDone: { type: Boolean, default: false },
+    todoList: { type: Schema.Types.ObjectId, ref: 'TodoList' },
 })
 
-module.exports = model('TodoItem', TodoItem);
+module.exports = model('TodoItem', TodoItem)

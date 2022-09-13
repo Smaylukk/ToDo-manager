@@ -21,10 +21,22 @@ class Auth {
 
     async register(username, password) {
         const passHash = bcrypt.hashSync(password, 5)
-        return await User.create({
+        const user = await User.create({
             username,
             password: passHash,
         })
+
+        return this.jwtSign(user._id, username)
+    }
+
+    async check(context) {
+        console.log(context)
+        const { user } = context
+        if (user) {
+            return this.jwtSign(user.id, user.username)
+        } else {
+            return null
+        }
     }
 
     jwtSign(id, username) {
@@ -38,7 +50,8 @@ class Auth {
         try {
             return jwt.verify(token, this.secretKey)
         } catch (error) {
-            return `Помилка верфікації - ${error}`
+            console.error('Помилка верифікації токену')
+            return null
         }
     }
 }

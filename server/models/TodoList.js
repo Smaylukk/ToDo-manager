@@ -9,8 +9,10 @@ const TodoList = new Schema({
 })
 TodoList.virtual('items', {
     ref: TodoItem,
-    localField: 'todoList',
-    foreignField: 'id',
+    localField: 'id',
+    foreignField: 'todoList',
 })
+/*TodoList.set('toObject', { virtuals: true })
+TodoList.set('toJSON', { virtuals: true })*/
 
 module.exports = model('TodoList', TodoList)
