@@ -1,42 +1,48 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import NavBar from "../components/NavBar";
 import { observer } from "mobx-react-lite";
 import Tumbler from "../components/Tumbler";
 import TodoGrid from "../components/TodoGrid";
 import TodoAccordion from "../components/TodoAccordion";
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Stack,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Button, Stack, useDisclosure } from "@chakra-ui/react";
 import { useMutation, useQuery } from "@apollo/client";
-import { ADD_TODO_LIST, ALL_TODO_LIST, TODO_LIST } from "../http/todoAPI";
-import { Context } from "../index";
+import {
+  ALL_TODO_LIST,
+  DELETE_TODO_ITEM,
+  DELETE_TODO_LIST,
+  TODO_LIST,
+  TOOGLE_TODO_ITEM,
+} from "../http/todoAPI";
+import ModalEditList from "../components/modals/ModalEditList";
+import ModalLoader from "../components/modals/ModalLoader";
+import ModalEditItem from "../components/modals/ModalEditItem";
 
 const Home = observer(() => {
-  const { user } = useContext(Context);
-  const [listName, setListName] = useState("");
-  const [listColor, setListColor] = useState("");
+  // LIST
   const [listId, setListId] = useState("");
+  const [todoListData, setTodoListData] = useState({});
   const [viewMode, setViewMode] = useState("0");
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const {
+    isOpen: isOpenLoader,
+    onOpen: onOpenLoader,
+    onClose: onCloseLoader,
+  } = useDisclosure();
+  // ITEM
+  const [itemId, setItemId] = useState(null);
+  const {
+    isOpen: isOpenItem,
+    onOpen: onOpenItem,
+    onClose: onCloseItem,
+  } = useDisclosure();
+  const [todoItemData, setTodoItemData] = useState({});
+  //LIST
   const { refetch: updateTodoList } = useQuery(TODO_LIST, {
     variables: { todoList: listId },
     fetchPolicy: "no-cache",
   });
 
-  const [addTodoList] = useMutation(ADD_TODO_LIST, {
+  const [deleteTodoList] = useMutation(DELETE_TODO_LIST, {
     refetchQueries: () => [
       {
         query: ALL_TODO_LIST,
@@ -47,50 +53,88 @@ const Home = observer(() => {
 
   const HandleListEdit = useCallback(async (id) => {
     setListId(id);
-    console.log(id);
     updateTodoList({ todoList: id }).then((res) => {
       const { data } = res;
-      console.log(data);
       if (data.private.todoList) {
-        setListName(data.private.todoList.name);
-        setListColor(data.private.todoList.color);
+        setTodoListData(data.private.todoList);
         onOpen();
       }
     });
+    // eslint-disable-next-line
   }, []);
-
-  const SaveList = (e) => {
-    if (listId) {
-      // save list
-    } else {
-      // create list
-      addTodoList({
-        variables: {
-          name: listName,
-          color: listColor,
-          user: user.user.id,
-        },
-      })
-        .then((data) => {
-          onClose();
-        })
-        .catch((err) => alert(err));
-    }
-  };
-
-  const createTodoList = (e) => {
+  const HandleListDelete = useCallback(async (id) => {
+    onOpenLoader();
+    deleteTodoList({ variables: { id } }).finally(() => onCloseLoader());
+    // eslint-disable-next-line
+  }, []);
+  const HandleCreateTodoList = (e) => {
     e.preventDefault();
-    setListName("");
-    setListColor("");
 
     setListId(null);
+    setTodoListData(null);
     onOpen();
   };
+
+  // ITEM
+  const { refetch: updateTodoItem } = useQuery(TODO_LIST, {
+    variables: { todoItem: itemId },
+    fetchPolicy: "no-cache",
+  });
+  const [deleteTodoItem] = useMutation(DELETE_TODO_ITEM, {
+    refetchQueries: () => [
+      {
+        query: ALL_TODO_LIST,
+        variables: {},
+      },
+    ],
+  });
+  const [toogleTodoItem] = useMutation(TOOGLE_TODO_ITEM, {
+    refetchQueries: () => [
+      {
+        query: ALL_TODO_LIST,
+        variables: {},
+      },
+    ],
+  });
+
+  const HandleItemEdit = useCallback(async (id) => {
+    setItemId(id);
+    updateTodoItem({ todoItem: id }).then((res) => {
+      const { data } = res;
+      if (data.private.todoItem) {
+        setTodoItemData(data.private.todoItem);
+        onOpen();
+      }
+    });
+    // eslint-disable-next-line
+  }, []);
+  const HandleItemDelete = useCallback(async (id) => {
+    await deleteTodoItem({ variables: { id } });
+    // eslint-disable-next-line
+  }, []);
+  const HandleItemCreate = useCallback(async (id) => {
+    setListId(id);
+    setItemId(null);
+    setTodoItemData(null);
+    onOpenItem();
+    // eslint-disable-next-line
+  }, []);
+  const HandleItemToogle = useCallback(async (id) => {
+    await toogleTodoItem({ variables: { id } });
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <>
       <NavBar />
-      <Stack spacing={8} direction="row" align="center" mb={3}>
+      <Stack
+        spacing={8}
+        direction="row"
+        align="center"
+        mx={2}
+        my={2}
+        wrap={"wrap"}
+      >
         <Tumbler viewMode={viewMode} changeViewMode={setViewMode} />{" "}
         <Button
           colorScheme="teal"
@@ -100,53 +144,45 @@ const Home = observer(() => {
           boxShadow="md"
           px={5}
           py={2}
-          onClick={createTodoList}
+          onClick={HandleCreateTodoList}
         >
           + Створти новий список
         </Button>
       </Stack>
       {viewMode === "1" ? (
-        <TodoGrid listEdit={HandleListEdit} />
+        <TodoGrid
+          listEdit={HandleListEdit}
+          listDelete={HandleListDelete}
+          itemEdit={HandleItemEdit}
+          itemDelete={HandleItemDelete}
+          itemCreate={HandleItemCreate}
+          itemToogle={HandleItemToogle}
+        />
       ) : (
-        <TodoAccordion listEdit={HandleListEdit} />
+        <TodoAccordion
+          listEdit={HandleListEdit}
+          listDelete={HandleListDelete}
+          itemEdit={HandleItemEdit}
+          itemDelete={HandleItemDelete}
+          itemCreate={HandleItemCreate}
+          itemToogle={HandleItemToogle}
+        />
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create your account</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>Назва</FormLabel>
-              <Input
-                placeholder="Навза списку"
-                value={listName}
-                onChange={(e) => setListName(e.target.value)}
-              />
-            </FormControl>
-
-            <FormControl mt={4}>
-              <FormLabel>Колір</FormLabel>
-              <Input
-                type={"color"}
-                value={listColor}
-                onChange={(e) => {
-                  setListColor(e.target.value);
-                  console.log(e.target.value);
-                }}
-              />
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={SaveList}>
-              Save
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ModalEditList
+        isOpen={isOpen}
+        onClose={onClose}
+        listId={listId}
+        todoListData={todoListData}
+      />
+      <ModalEditItem
+        isOpen={isOpenItem}
+        onClose={onCloseItem}
+        itemId={itemId}
+        listId={listId}
+        todoItemData={todoItemData}
+      />
+      <ModalLoader isOpen={isOpenLoader} onClose={onCloseLoader} />
     </>
   );
 });

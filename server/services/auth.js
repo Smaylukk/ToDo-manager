@@ -30,7 +30,6 @@ class Auth {
     }
 
     async check(context) {
-        console.log(context)
         const { user } = context
         if (user) {
             return this.jwtSign(user.id, user.username)
@@ -47,12 +46,15 @@ class Auth {
     }
 
     jwtVerify(token) {
-        try {
-            return jwt.verify(token, this.secretKey)
-        } catch (error) {
-            console.error('Помилка верифікації токену')
-            return null
+        if (token) {
+            try {
+                return jwt.verify(token, this.secretKey)
+            } catch (error) {
+                console.error('Помилка верифікації токену')
+                return null
+            }
         }
+        return null
     }
 }
 

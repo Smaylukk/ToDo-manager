@@ -1,47 +1,52 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { observer } from "mobx-react-lite";
-import {
-  Center,
-  Grid,
-  GridItem,
-  Heading,
-  Spinner,
-  Text,
-  Wrap,
-  WrapItem,
-} from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Spinner } from "@chakra-ui/react";
 import TodoItem from "./TodoItem";
 import { useQuery } from "@apollo/client";
 import { ALL_TODO_LIST } from "../http/todoAPI";
+import TodoItemHeading from "./TodoItemHeading";
 
-const TodoGrid = observer(() => {
+const TodoGrid = observer((props) => {
   const { loading, data: todoLists } = useQuery(ALL_TODO_LIST);
 
   if (loading) {
     return <Spinner />;
   }
-  /*const items = [
-    { name: "Item 1", color: "blue.500" },
-    { name: "Item 2", color: "black" },
-    { name: "Item 3", color: "red" },
-    { name: "Item 4", color: "green" },
-    { name: "Item 5", color: "gray.500" },
-    { name: "Item 6", color: "yellow" },
-  ];*/
+
   return (
-    <Grid templateColumns="repeat(4, 1fr)" gap={3}>
+    <SimpleGrid gap={3} minChildWidth={"350px"}>
       {todoLists.private.todoLists.map((list) => (
-        <GridItem w="100%" border={"3px solid"} borderRadius={10} key={list.id}>
+        <Box
+          colSpan={3}
+          maxW={400}
+          border={"3px solid"}
+          borderRadius={10}
+          key={list.id}
+          borderColor={list.color}
+        >
           <Heading>
-            <Text color={list.color}>{list.name}</Text>
+            <TodoItemHeading
+              list={list}
+              listEdit={props.listEdit}
+              listDelete={props.listDelete}
+              itemCreate={props.itemCreate}
+            />
           </Heading>
           {list?.items &&
             list.items.map((item) => (
-              <TodoItem key={item.id}>{item.name}</TodoItem>
+              <TodoItem
+                key={item.id}
+                item={item}
+                itemToogle={props.itemToogle}
+                itemEdit={props.itemEdit}
+                itemDelete={props.itemDelete}
+              >
+                {item.name}
+              </TodoItem>
             ))}
-        </GridItem>
+        </Box>
       ))}
-    </Grid>
+    </SimpleGrid>
   );
 });
 

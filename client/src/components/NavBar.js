@@ -1,26 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { Context } from "..";
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Heading,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
-import client from "../graphql/client";
+import { Box, Button, Center, Flex, Link, Stack, Text } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 
 const NavBar = observer((props) => {
   const { user } = useContext(Context);
 
   const logout = async () => {
+    localStorage.removeItem("token");
     user.setUser({});
     user.setIsAuth(false);
-    localStorage.removeItem("token");
-    await client.resetStore();
   };
 
   return (

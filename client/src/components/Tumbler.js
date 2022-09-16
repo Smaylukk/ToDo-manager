@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
-import NavBar from "../components/NavBar";
+import React from "react";
 import { observer } from "mobx-react-lite";
 import { Box, HStack, Text, useRadio, useRadioGroup } from "@chakra-ui/react";
 
-const Tumbler = observer(({ viewMode, changeViewMode }) => {
+const Tumbler = observer(({ changeViewMode }) => {
   const options = [
     { name: "Список", value: "0" },
     { name: "Картки", value: "1" },
@@ -18,7 +17,7 @@ const Tumbler = observer(({ viewMode, changeViewMode }) => {
   const group = getRootProps();
 
   return (
-    <HStack {...group}>
+    <HStack {...group} wrap={"wrap"}>
       <Text>Режим перегляду</Text>
       {options.map(({ name, value }) => {
         const radio = getRadioProps({ value, name });

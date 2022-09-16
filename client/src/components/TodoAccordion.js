@@ -6,14 +6,12 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  Box,
-  Flex,
   Spinner,
 } from "@chakra-ui/react";
 import TodoItem from "./TodoItem";
 import { useQuery } from "@apollo/client";
 import { ALL_TODO_LIST } from "../http/todoAPI";
-import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import TodoItemHeading from "./TodoItemHeading";
 
 const TodoAccordion = observer((props) => {
   const { loading, data: todoLists } = useQuery(ALL_TODO_LIST);
@@ -23,42 +21,40 @@ const TodoAccordion = observer((props) => {
   }
 
   return (
-    <Accordion allowMultiple>
-      {todoLists.private.todoLists.map((list) => (
-        <AccordionItem key={list.id}>
-          <Flex>
+    <>
+      <Accordion allowMultiple>
+        {todoLists.private.todoLists.map((list) => (
+          <AccordionItem key={list.id}>
             <h2>
               <AccordionButton>
-                <Box flex="1" textAlign="left" color={list.color}>
-                  {list.name}
-                </Box>
+                <TodoItemHeading
+                  list={list}
+                  listEdit={props.listEdit}
+                  listDelete={props.listDelete}
+                  itemCreate={props.itemCreate}
+                />
                 <AccordionIcon />
               </AccordionButton>
             </h2>
-            <EditIcon
-              color={["black"]}
-              mr="2"
-              cursor={"pointer"}
-              _hover={{ transform: "scale(1.5)" }}
-              onClick={() => {
-                props.listEdit(list.id);
-              }}
-            />
-            <DeleteIcon
-              color="red.500"
-              cursor={"pointer"}
-              _hover={{ transform: "scale(1.5)" }}
-            />
-          </Flex>
-          <AccordionPanel pb={4}>
-            {list?.items &&
-              list.items.map((item) => (
-                <TodoItem key={item.id}>{item.name}</TodoItem>
-              ))}
-          </AccordionPanel>
-        </AccordionItem>
-      ))}
-    </Accordion>
+
+            <AccordionPanel pb={4}>
+              {list?.items &&
+                list.items.map((item) => (
+                  <TodoItem
+                    key={item.id}
+                    item={item}
+                    itemToogle={props.itemToogle}
+                    itemEdit={props.itemEdit}
+                    itemDelete={props.itemDelete}
+                  >
+                    {item.name}
+                  </TodoItem>
+                ))}
+            </AccordionPanel>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </>
   );
 });
 

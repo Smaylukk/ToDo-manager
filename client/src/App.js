@@ -15,7 +15,6 @@ const App = observer(() => {
   useEffect(() => {
     checkAuth()
       .then(({ data }) => {
-        console.log("Auth-", data);
         const token = data?.public?.auth?.token;
         if (token) {
           const decodedData = processToken(token);
@@ -24,7 +23,7 @@ const App = observer(() => {
         }
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user, checkAuth]);
 
   if (loading) {
     return <Spinner />;

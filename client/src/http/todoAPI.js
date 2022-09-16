@@ -71,3 +71,66 @@ export const ADD_TODO_LIST = gql`
     }
   }
 `;
+
+export const SAVE_TODO_LIST = gql`
+  mutation SaveTodoList($id: ID, $name: String, $color: String) {
+    private {
+      saveTodoList(id: $id, name: $name, color: $color) {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const DELETE_TODO_LIST = gql`
+  mutation DeleteTodoList($id: ID) {
+    private {
+      deleteTodoList(id: $id) {
+        id
+      }
+    }
+  }
+`;
+
+export const ADD_TODO_ITEM = gql`
+  mutation AddTodoItem($name: String, $todoList: ID) {
+    private {
+      addTodoItem(name: $name, todoList: $todoList) {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const SAVE_TODO_ITEM = gql`
+  mutation SaveTodoItem($id: ID, $name: String, $todoList: ID) {
+    private {
+      saveTodoItem(id: $id, name: $name, todoList: $todoList) {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const DELETE_TODO_ITEM = gql`
+  mutation DeleteTodoItem($id: ID) {
+    private {
+      deleteTodoItem(id: $id) {
+        id
+      }
+    }
+  }
+`;
+
+export const TOOGLE_TODO_ITEM = gql`
+  mutation ToogleTodoItem($id: ID) {
+    private {
+      toogleTodoItem(id: $id) {
+        id
+      }
+    }
+  }
+`;

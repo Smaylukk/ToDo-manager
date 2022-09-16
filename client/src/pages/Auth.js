@@ -8,19 +8,18 @@ import {
   InputGroup,
   Stack,
   Box,
-  Link,
   Avatar,
   FormControl,
-  FormHelperText,
   InputRightElement,
 } from "@chakra-ui/react";
 import { Context } from "..";
 import { LOGIN_ROUTE, HOME_ROUTE, REGISTRATION_ROUTE } from "../routes/path";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useMutation } from "@apollo/client";
-import { CHECKAUTH, LOGIN, REGISTRATION } from "../http/userAPI";
+import { LOGIN, REGISTRATION } from "../http/userAPI";
 import { processToken } from "../http/auth";
 import { observer } from "mobx-react-lite";
+import client from "../graphql/client";
 
 const Auth = observer(() => {
   const { user } = useContext(Context);
@@ -46,22 +45,27 @@ const Auth = observer(() => {
           password,
         },
       })
-        .then(({ data }) => {
-          console.log("Login-", data);
+        .then(async ({ data }) => {
           const token = data?.public?.login?.token;
-          console.log("Login token-", data.public);
           if (token) {
             const decodedData = processToken(token);
             user.setUser(decodedData);
             user.setIsAuth(true);
+            console.log(decodedData);
+            console.log(localStorage.getItem("token"));
+
+            await client.clearStore();
+            client
+              .resetStore()
+              .then(() => navigate(HOME_ROUTE))
+              .catch(() => {});
           }
         })
         .catch((err) => {
-          console.error(err);
+          console.error(err.message);
           user.setUser(null);
           user.setIsAuth(false);
-        })
-        .finally(() => navigate(HOME_ROUTE));
+        });
     } else {
       registerApi({
         variables: {
@@ -69,8 +73,7 @@ const Auth = observer(() => {
           password,
         },
       })
-        .then((data) => {
-          console.log("Register-", data);
+        .then(async (data) => {
           const token = data?.public?.register?.token;
           if (token) {
             const decodedData = processToken(token);
@@ -78,11 +81,14 @@ const Auth = observer(() => {
             user.setIsAuth(true);
           }
         })
-        .catch((err) => {
+        .catch(() => {
           user.setUser(null);
           user.setIsAuth(false);
         })
-        .finally(() => navigate(HOME_ROUTE));
+        .finally(async () => {
+          await client.resetStore();
+          navigate(HOME_ROUTE);
+        });
     }
   };
 

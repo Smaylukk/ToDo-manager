@@ -44,7 +44,9 @@ const todoListType = new GraphQLObjectType({
             type: new GraphQLList(todoItemType),
             require: true,
             resolve(source) {
-                return TodoItem.find({ todoList: source.id }).exec()
+                return TodoItem.find({ todoList: source.id })
+                    .sort({ isDone: 1 })
+                    .exec()
             },
         },
     }),
@@ -103,7 +105,9 @@ const privatNameSpaceQuery = new GraphQLObjectType({
             args: {},
             resolve(parents, args, context) {
                 return TodoList.find({ user: context.user.id })
-                    .populate('items')
+                    .populate({
+                        path: 'items',
+                    })
                     .exec()
             },
         },
@@ -115,7 +119,11 @@ const privatNameSpaceQuery = new GraphQLObjectType({
             resolve(parents, args) {
                 return TodoItem.find({
                     todoList: args.todoList,
-                }).exec()
+                })
+                    .sort({
+                        isDone: 1,
+                    })
+                    .exec()
             },
         },
     },
@@ -153,6 +161,79 @@ const privateNameSpaceMutation = new GraphQLObjectType({
                     name,
                     color,
                     user,
+                })
+            },
+        },
+        saveTodoList: {
+            type: todoListType,
+            args: {
+                id: { type: GraphQLID },
+                name: { type: GraphQLString },
+                color: { type: GraphQLString },
+            },
+            resolve(source, { id, name, color }) {
+                return TodoList.findByIdAndUpdate(id, {
+                    name,
+                    color,
+                }).exec()
+            },
+        },
+        deleteTodoList: {
+            type: todoListType,
+            args: {
+                id: { type: GraphQLID },
+            },
+            resolve(source, args) {
+                return TodoList.findByIdAndDelete(args.id).exec()
+            },
+        },
+        addTodoItem: {
+            type: todoItemType,
+            args: {
+                name: { type: GraphQLString },
+                isDone: { type: GraphQLBoolean },
+                todoList: { type: GraphQLID },
+            },
+            resolve(source, { name, isDone, todoList }) {
+                return TodoItem.create({
+                    name,
+                    isDone,
+                    todoList,
+                })
+            },
+        },
+        saveTodoItem: {
+            type: todoItemType,
+            args: {
+                id: { type: GraphQLID },
+                name: { type: GraphQLString },
+                isDone: { type: GraphQLBoolean },
+            },
+            resolve(source, { id, name, isDone }) {
+                return TodoItem.findByIdAndUpdate(id, {
+                    name,
+                    isDone,
+                }).exec()
+            },
+        },
+        deleteTodoItem: {
+            type: todoItemType,
+            args: {
+                id: { type: GraphQLID },
+            },
+            resolve(source, args) {
+                return TodoItem.findByIdAndDelete(args.id).exec()
+            },
+        },
+        toogleTodoItem: {
+            type: todoItemType,
+            args: {
+                id: { type: GraphQLID },
+            },
+            resolve(source, args) {
+                TodoItem.findById(args.id).then((item) => {
+                    item.isDone = !item.isDone
+                    item.save().then((item) => item)
                 })
             },
         },
