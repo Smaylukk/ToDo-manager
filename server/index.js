@@ -17,7 +17,7 @@ const auth = require('./services/auth')
 const start = async () => {
     mongoose.connect(MONGO_DB, (error) => {
         if (error) {
-            throw new Error(error)
+            throw error
         } else {
             console.log('Mongo db connected')
         }

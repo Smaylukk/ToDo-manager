@@ -20,13 +20,18 @@ class Auth {
     }
 
     async register(username, password) {
-        const passHash = bcrypt.hashSync(password, 5)
-        const user = await User.create({
-            username,
-            password: passHash,
-        })
+        const user = await User.findOne({ username })
+        if (!user) {
+            const passHash = bcrypt.hashSync(password, 5)
+            const newUser = await User.create({
+                username,
+                password: passHash,
+            })
 
-        return this.jwtSign(user._id, username)
+            return this.jwtSign(newUser._id, username)
+        } else {
+            throw new GraphQLError(`Користувач ${username} вже зареєстрований`)
+        }
     }
 
     async check(context) {

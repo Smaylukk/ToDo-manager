@@ -244,7 +244,7 @@ const publicNameSpaceMutation = new GraphQLObjectType({
     name: 'public',
     fields: () => ({
         register: {
-            type: userType,
+            type: jwtType,
             args: {
                 username: { type: GraphQLString },
                 password: { type: GraphQLString },
