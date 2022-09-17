@@ -225,7 +225,7 @@ const privateNameSpaceMutation = new GraphQLObjectType({
                 return TodoItem.findByIdAndDelete(args.id).exec()
             },
         },
-        toogleTodoItem: {
+        toggleTodoItem: {
             type: todoItemType,
             args: {
                 id: { type: GraphQLID },
