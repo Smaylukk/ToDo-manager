@@ -4,7 +4,7 @@ import { Flex, Text } from "@chakra-ui/react";
 import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 
 const TodoItem = observer((props) => {
-  const { item } = props;
+  const { item, children, itemToggle, itemEdit, itemDelete } = props;
 
   return (
     <>
@@ -14,11 +14,15 @@ const TodoItem = observer((props) => {
         borderRadius={10}
         w="100%"
         p={1}
-        mb={1}
+        //mb={1}
         justifyContent="space-between"
+        _hover={{ bgColor: "gray.100" }}
       >
-        <Text decoration={item.isDone ? "line-through" : "none"}>
-          {props.children}
+        <Text
+          decoration={item.isDone ? "line-through" : "none"}
+          color={item.isDone ? "green" : "black"}
+        >
+          {children}
         </Text>
         <Flex>
           <CheckIcon
@@ -28,7 +32,7 @@ const TodoItem = observer((props) => {
             _hover={{ transform: "scale(1.5)" }}
             onClick={(e) => {
               e.stopPropagation();
-              props.itemToogle(item.id);
+              itemToggle(item.id);
             }}
           />
           <EditIcon
@@ -38,7 +42,7 @@ const TodoItem = observer((props) => {
             _hover={{ transform: "scale(1.5)" }}
             onClick={(e) => {
               e.stopPropagation();
-              props.itemEdit(item.id);
+              itemEdit(item.id);
             }}
           />
           <DeleteIcon
@@ -47,7 +51,7 @@ const TodoItem = observer((props) => {
             _hover={{ transform: "scale(1.5)" }}
             onClick={(e) => {
               e.stopPropagation();
-              props.itemDelete(item.id);
+              itemDelete(item.id);
             }}
           />
         </Flex>

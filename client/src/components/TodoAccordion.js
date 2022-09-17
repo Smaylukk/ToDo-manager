@@ -14,6 +14,8 @@ import { ALL_TODO_LIST } from "../http/todoAPI";
 import TodoItemHeading from "./TodoItemHeading";
 
 const TodoAccordion = observer((props) => {
+  const { listEdit, listDelete, itemCreate, itemToggle, itemEdit, itemDelete } =
+    props;
   const { loading, data: todoLists } = useQuery(ALL_TODO_LIST);
 
   if (loading) {
@@ -29,9 +31,9 @@ const TodoAccordion = observer((props) => {
               <AccordionButton>
                 <TodoItemHeading
                   list={list}
-                  listEdit={props.listEdit}
-                  listDelete={props.listDelete}
-                  itemCreate={props.itemCreate}
+                  listEdit={listEdit}
+                  listDelete={listDelete}
+                  itemCreate={itemCreate}
                 />
                 <AccordionIcon />
               </AccordionButton>
@@ -43,9 +45,9 @@ const TodoAccordion = observer((props) => {
                   <TodoItem
                     key={item.id}
                     item={item}
-                    itemToogle={props.itemToogle}
-                    itemEdit={props.itemEdit}
-                    itemDelete={props.itemDelete}
+                    itemToggle={itemToggle}
+                    itemEdit={itemEdit}
+                    itemDelete={itemDelete}
                   >
                     {item.name}
                   </TodoItem>

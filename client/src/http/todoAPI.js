@@ -126,9 +126,9 @@ export const DELETE_TODO_ITEM = gql`
 `;
 
 export const TOOGLE_TODO_ITEM = gql`
-  mutation ToogleTodoItem($id: ID) {
+  mutation ToggleTodoItem($id: ID) {
     private {
-      toogleTodoItem(id: $id) {
+      toggleTodoItem(id: $id) {
         id
       }
     }

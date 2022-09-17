@@ -88,7 +88,7 @@ const Home = observer(() => {
       },
     ],
   });
-  const [toogleTodoItem] = useMutation(TOOGLE_TODO_ITEM, {
+  const [toggleTodoItem] = useMutation(TOOGLE_TODO_ITEM, {
     refetchQueries: () => [
       {
         query: ALL_TODO_LIST,
@@ -119,8 +119,8 @@ const Home = observer(() => {
     onOpenItem();
     // eslint-disable-next-line
   }, []);
-  const HandleItemToogle = useCallback(async (id) => {
-    await toogleTodoItem({ variables: { id } });
+  const HandleItemToggle = useCallback(async (id) => {
+    await toggleTodoItem({ variables: { id } });
     // eslint-disable-next-line
   }, []);
 
@@ -128,11 +128,11 @@ const Home = observer(() => {
     <>
       <NavBar />
       <Stack
-        spacing={8}
-        direction="row"
-        align="center"
+        spacing={2}
+        direction="column"
+        align="flex-start"
         mx={2}
-        my={2}
+        //my={2}
         wrap={"wrap"}
       >
         <Tumbler viewMode={viewMode} changeViewMode={setViewMode} />{" "}
@@ -146,7 +146,7 @@ const Home = observer(() => {
           py={2}
           onClick={HandleCreateTodoList}
         >
-          + Створти новий список
+          + Новий список
         </Button>
       </Stack>
       {viewMode === "1" ? (
@@ -156,7 +156,7 @@ const Home = observer(() => {
           itemEdit={HandleItemEdit}
           itemDelete={HandleItemDelete}
           itemCreate={HandleItemCreate}
-          itemToogle={HandleItemToogle}
+          itemToggle={HandleItemToggle}
         />
       ) : (
         <TodoAccordion
@@ -165,7 +165,7 @@ const Home = observer(() => {
           itemEdit={HandleItemEdit}
           itemDelete={HandleItemDelete}
           itemCreate={HandleItemCreate}
-          itemToogle={HandleItemToogle}
+          itemToggle={HandleItemToggle}
         />
       )}
 

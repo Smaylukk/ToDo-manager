@@ -7,6 +7,8 @@ import { ALL_TODO_LIST } from "../http/todoAPI";
 import TodoItemHeading from "./TodoItemHeading";
 
 const TodoGrid = observer((props) => {
+  const { listEdit, listDelete, itemCreate, itemToggle, itemEdit, itemDelete } =
+    props;
   const { loading, data: todoLists } = useQuery(ALL_TODO_LIST);
 
   if (loading) {
@@ -19,17 +21,17 @@ const TodoGrid = observer((props) => {
         <Box
           colSpan={3}
           maxW={400}
-          border={"3px solid"}
+          border={"1px solid"}
           borderRadius={10}
           key={list.id}
           borderColor={list.color}
         >
-          <Heading>
+          <Heading size={"lg"}>
             <TodoItemHeading
               list={list}
-              listEdit={props.listEdit}
-              listDelete={props.listDelete}
-              itemCreate={props.itemCreate}
+              listEdit={listEdit}
+              listDelete={listDelete}
+              itemCreate={itemCreate}
             />
           </Heading>
           {list?.items &&
@@ -37,9 +39,9 @@ const TodoGrid = observer((props) => {
               <TodoItem
                 key={item.id}
                 item={item}
-                itemToogle={props.itemToogle}
-                itemEdit={props.itemEdit}
-                itemDelete={props.itemDelete}
+                itemToggle={itemToggle}
+                itemEdit={itemEdit}
+                itemDelete={itemDelete}
               >
                 {item.name}
               </TodoItem>

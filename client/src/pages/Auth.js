@@ -11,6 +11,8 @@ import {
   Avatar,
   FormControl,
   InputRightElement,
+  AlertIcon,
+  Alert,
 } from "@chakra-ui/react";
 import { Context } from "..";
 import { LOGIN_ROUTE, HOME_ROUTE, REGISTRATION_ROUTE } from "../routes/path";
@@ -19,13 +21,14 @@ import { useMutation } from "@apollo/client";
 import { LOGIN, REGISTRATION } from "../http/userAPI";
 import { processToken } from "../http/auth";
 import { observer } from "mobx-react-lite";
-import client from "../graphql/client";
 
 const Auth = observer(() => {
   const { user } = useContext(Context);
   const location = useLocation();
   const navigate = useNavigate();
   const isLoginPage = location.pathname === LOGIN_ROUTE;
+  const [isError, setIsError] = useState(false);
+  const [textError, setTextError] = useState("");
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -38,6 +41,7 @@ const Auth = observer(() => {
 
   const buttonClick = async (e) => {
     e.preventDefault();
+    hideError();
     if (isLoginPage) {
       loginApi({
         variables: {
@@ -51,20 +55,16 @@ const Auth = observer(() => {
             const decodedData = processToken(token);
             user.setUser(decodedData);
             user.setIsAuth(true);
-            console.log(decodedData);
-            console.log(localStorage.getItem("token"));
 
-            await client.clearStore();
-            client
-              .resetStore()
-              .then(() => navigate(HOME_ROUTE))
-              .catch(() => {});
+            navigate(HOME_ROUTE);
           }
         })
         .catch((err) => {
-          console.error(err.message);
+          //console.error(err);
           user.setUser(null);
           user.setIsAuth(false);
+
+          showError(err.message);
         });
     } else {
       registerApi({
@@ -73,23 +73,33 @@ const Auth = observer(() => {
           password,
         },
       })
-        .then(async (data) => {
+        .then(async ({ data }) => {
+          console.log(data);
           const token = data?.public?.register?.token;
           if (token) {
             const decodedData = processToken(token);
             user.setUser(decodedData);
             user.setIsAuth(true);
+
+            navigate(HOME_ROUTE);
           }
         })
-        .catch(() => {
+        .catch((err) => {
           user.setUser(null);
           user.setIsAuth(false);
-        })
-        .finally(async () => {
-          await client.resetStore();
-          navigate(HOME_ROUTE);
+
+          showError(err.message);
         });
     }
+  };
+
+  const showError = (text) => {
+    setIsError(true);
+    setTextError(text);
+  };
+  const hideError = () => {
+    setIsError(false);
+    setTextError("");
   };
 
   return (
@@ -155,6 +165,10 @@ const Auth = observer(() => {
             </Stack>
           </form>
         </Box>
+        <Alert status="error" display={isError ? "flex" : "none"}>
+          <AlertIcon />
+          {textError}
+        </Alert>
       </Stack>
       <Box>
         Немає аккаунту?{" "}
