@@ -39,7 +39,7 @@ const start = async () => {
     })
 
     await server.start()
-    server.applyMiddleware({ app, cors: true })
+    server.applyMiddleware({ app, cors: false })
     app.listen(PORT, () => {
         console.log(`Server start at ${PORT}`)
     })

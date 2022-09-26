@@ -13,9 +13,8 @@
 /client/build
 
 # misc
-.DS_Store
-.env
-.env.development.local
+/client/.env
+/server/.env
 
 npm-debug.log*
 yarn-debug.log*
