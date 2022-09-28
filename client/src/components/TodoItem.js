@@ -4,7 +4,7 @@ import { Flex, Text } from "@chakra-ui/react";
 import { CheckIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 
 const TodoItem = observer((props) => {
-  const { item, children, itemToggle, itemEdit, itemDelete } = props;
+  const { item, listId, children, itemToggle, itemEdit, itemDelete } = props;
 
   return (
     <>
@@ -42,7 +42,7 @@ const TodoItem = observer((props) => {
             _hover={{ transform: "scale(1.5)" }}
             onClick={(e) => {
               e.stopPropagation();
-              itemEdit(item.id);
+              itemEdit(item.id, listId);
             }}
           />
           <DeleteIcon

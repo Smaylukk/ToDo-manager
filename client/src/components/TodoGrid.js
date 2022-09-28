@@ -39,6 +39,7 @@ const TodoGrid = observer((props) => {
               <TodoItem
                 key={item.id}
                 item={item}
+                listId={list.id}
                 itemToggle={itemToggle}
                 itemEdit={itemEdit}
                 itemDelete={itemDelete}

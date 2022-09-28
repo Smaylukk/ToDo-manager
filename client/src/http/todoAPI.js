@@ -105,9 +105,9 @@ export const ADD_TODO_ITEM = gql`
 `;
 
 export const SAVE_TODO_ITEM = gql`
-  mutation SaveTodoItem($id: ID, $name: String, $todoList: ID) {
+  mutation SaveTodoItem($id: ID, $name: String) {
     private {
-      saveTodoItem(id: $id, name: $name, todoList: $todoList) {
+      saveTodoItem(id: $id, name: $name) {
         id
         name
       }

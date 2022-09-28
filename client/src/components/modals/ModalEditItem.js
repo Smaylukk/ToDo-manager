@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   Button,
@@ -22,8 +22,16 @@ import {
 
 const ModalEditItem = observer((props) => {
   const [itemName, setItemName] = useState("");
-  const { isOpen, onClose, itemId, listId } = props;
+  const { isOpen, onClose, itemId, listId, todoItemData } = props;
   const itemNameRef = useRef(null);
+
+  useEffect(() => {
+    if (todoItemData) {
+      setItemName(todoItemData.name);
+    } else {
+      setItemName("");
+    }
+  }, [todoItemData]);
 
   const [addTodoItem] = useMutation(ADD_TODO_ITEM, {
     refetchQueries: () => [
@@ -81,7 +89,7 @@ const ModalEditItem = observer((props) => {
         </ModalHeader>
         <ModalCloseButton />
         <form
-          onClick={(e) => {
+          onSubmit={(e) => {
             e.preventDefault();
             if (itemName) {
               saveItem();

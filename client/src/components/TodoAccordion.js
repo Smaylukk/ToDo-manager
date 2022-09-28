@@ -24,7 +24,7 @@ const TodoAccordion = observer((props) => {
 
   return (
     <>
-      <Accordion allowMultiple>
+      <Accordion defaultIndex={[0]} allowMultiple>
         {todoLists.private.todoLists.map((list) => (
           <AccordionItem key={list.id}>
             <h2>
@@ -45,6 +45,7 @@ const TodoAccordion = observer((props) => {
                   <TodoItem
                     key={item.id}
                     item={item}
+                    listId={list.id}
                     itemToggle={itemToggle}
                     itemEdit={itemEdit}
                     itemDelete={itemDelete}

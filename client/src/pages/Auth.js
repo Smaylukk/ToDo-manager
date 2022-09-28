@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   Flex,
   Heading,
@@ -14,18 +14,13 @@ import {
   AlertIcon,
   Alert,
 } from "@chakra-ui/react";
-import { Context } from "..";
-import { LOGIN_ROUTE, HOME_ROUTE, REGISTRATION_ROUTE } from "../routes/path";
+import { LOGIN_ROUTE, REGISTRATION_ROUTE } from "../routes/path";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { useMutation } from "@apollo/client";
-import { LOGIN, REGISTRATION } from "../http/userAPI";
-import { processToken } from "../http/auth";
 import { observer } from "mobx-react-lite";
+import useLogin from "../hooks/useLogin";
 
 const Auth = observer(() => {
-  const { user } = useContext(Context);
   const location = useLocation();
-  const navigate = useNavigate();
   const isLoginPage = location.pathname === LOGIN_ROUTE;
   const [isError, setIsError] = useState(false);
   const [textError, setTextError] = useState("");
@@ -34,65 +29,6 @@ const Auth = observer(() => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const [loginApi] = useMutation(LOGIN);
-  const [registerApi] = useMutation(REGISTRATION);
-
-  const handleShowClick = () => setShowPassword(!showPassword);
-
-  const buttonClick = async (e) => {
-    e.preventDefault();
-    hideError();
-    if (isLoginPage) {
-      loginApi({
-        variables: {
-          username,
-          password,
-        },
-      })
-        .then(async ({ data }) => {
-          const token = data?.public?.login?.token;
-          if (token) {
-            const decodedData = processToken(token);
-            user.setUser(decodedData);
-            user.setIsAuth(true);
-
-            navigate(HOME_ROUTE);
-          }
-        })
-        .catch((err) => {
-          //console.error(err);
-          user.setUser(null);
-          user.setIsAuth(false);
-
-          showError(err.message);
-        });
-    } else {
-      registerApi({
-        variables: {
-          username,
-          password,
-        },
-      })
-        .then(async ({ data }) => {
-          console.log(data);
-          const token = data?.public?.register?.token;
-          if (token) {
-            const decodedData = processToken(token);
-            user.setUser(decodedData);
-            user.setIsAuth(true);
-
-            navigate(HOME_ROUTE);
-          }
-        })
-        .catch((err) => {
-          user.setUser(null);
-          user.setIsAuth(false);
-
-          showError(err.message);
-        });
-    }
-  };
-
   const showError = (text) => {
     setIsError(true);
     setTextError(text);
@@ -100,6 +36,16 @@ const Auth = observer(() => {
   const hideError = () => {
     setIsError(false);
     setTextError("");
+  };
+
+  const authHandler = useLogin(isLoginPage, showError, username, password);
+
+  const handleShowClick = () => setShowPassword(!showPassword);
+
+  const buttonClick = async (e) => {
+    e.preventDefault();
+    hideError();
+    await authHandler();
   };
 
   return (
